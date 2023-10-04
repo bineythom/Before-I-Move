@@ -1,40 +1,251 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="utf-8">
+<title>Add a polygon to a map using a GeoJSON source</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+ 
+
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.js'></script>
+   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.css' rel='stylesheet' />
+   <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.4/mapbox-gl-draw.js'></script>
+   <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.4/mapbox-gl-draw.css' type='text/css' />
+   <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet">
+   <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+  
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/css/bootstrap.min.css" integrity="sha512-F7WyTLiiiPqvu2pGumDR15med0MDkUIo5VTVyyfECR5DZmCnDhti9q5VID02ItWjq6fvDfMaBaDl2J3WdL1uxA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/css/bootstrap-grid.min.css" integrity="sha512-3AxW5HcDzhL9MJdO2mpDEGEZ6NcCg/pDSa8R2kH5gwEA4r48RxZf0nPITA1NfX1pNA6a/eAayX+yW6QopF4jeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.min.js" integrity="sha512-NWNl2ZLgVBoi6lTcMsHgCQyrZVFnSmcaa3zRv0L3aoGXshwoxkGs3esa9zwQHsChGRL4aLDnJjJJeP6MjPX46Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.bundle.min.js" integrity="sha512-PqRelaJGXVuQ81N6wjUrRQelCDR7z8RvKGiR9SbSxKHPIt15eJDmIVv9EJgwq0XvgylszsjzvQ0+VyI2WtIshQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- Load the `mapbox-gl-geocoder` plugin. -->
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
+
 
 <style>
-    body { margin: 0; padding: 0; }
+body { margin: 0; padding: 0; }
 
-#bineymap {
+#marineMapAdmin {
      position: absolute;
       top: 0; 
       bottom: 0; 
       width: 100%; 
     }
 
-    .mapboxgl-popup {
-        max-width: 400px;
-        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  .map-overlay .map-overlay-inner {
+        background-color: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        padding: 10px;
+        margin: 10px;
         }
+         
+        .map-overlay h2 {
+        line-height: 24px;
+        display: block;
+        margin: 0 0 10px;
+        }
+         
+       
+        .rounded-rect {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 50px -25px black;
+            }
+             
+            .flex-center {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            }
+             
+            .flex-center.left {
+            left: 0px;
+            }
+             
+            .flex-center.right {
+            right: 0px;
+            }
+             
+            .sidebar-content {
+            position: absolute;
+            width: 95%;
+            height: 95%;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 32px;
+            color: gray;
+            }
+             
+            .sidebar-toggle {
+            position: absolute;
+            width: 1.3em;
+            height: 1.3em;
+            overflow: visible;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            }
+             
+            .sidebar-toggle.left {
+            right: -1.5em;
+            }
+             
+            .sidebar-toggle.right {
+            left: -1.5em;
+            }
+             
+            .sidebar-toggle:hover {
+            color: #0aa1cf;
+            cursor: pointer;
+            }
+             
+            .sidebar {
+            transition: transform 1s;
+            z-index: 1;
+            width: 300px;
+            height: 100%;
+            }
+             
+            /*
+            The sidebar styling has them "expanded" by default, we use CSS transforms to push them offscreen
+            The toggleSidebar() function removes this class from the element in order to expand it.
+            */
+            .left.collapsed {
+            transform: translateX(-295px);
+            }
+             
+            .right.collapsed {
+            transform: translateX(295px);
+            }
+
 
 
 </style>
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.0/mapbox-gl.css' rel='stylesheet' />
-
-<link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet">
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
- 
-
 </head>
 <body>
     
+    <div id="marineMapAdmin">
+        <div id="left" class="sidebar flex-center left collapsed">
+            <div class="sidebar-content rounded-rect flex-center" >
+          <textarea name="finalData" class="form-control" id="finalData" cols="20" rows="10"></textarea>
+            <div class="sidebar-toggle rounded-rect left" onclick="toggleSidebar('left')">
+            &rarr;
+            </div>
+            </div>
+            </div>
+            <!-- <div id="right" class="sidebar flex-center right collapsed">
+            <div class="sidebar-content rounded-rect flex-center">
+            Right Sidebar
+            <div class="sidebar-toggle rounded-rect right" onclick="toggleSidebar('right')">
+            &larr;
+            </div>
+            </div>
+            </div> -->
+        
+         </div>
+
+    <!-- <div class="">
+        <div class="">
+        <h2>Duration (ms)</h2>
+        <label id="ms">500</label>
+        <input id="slider" type="range" min="0" max="1000" step="50" value="500">
+        </div>
+        <button id="fade">Fade out</button>
+        </div> -->
 
 
-    <div id="bineymap"> </div> 
+
+    <div class="card" style="
+    font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    position: absolute;
+    top: 0;
+    right: 0;">
+        <div class="card-body">
+            <div class="map-overlay top">
+                <div class="map-overlay-inner">
+                <div class="row">
+                    <div class="col-6">
+                    <button type="button" class="btn btn-primary btn-sm  text-white" id="inlandbutton1" typeofIcon="addRain">Add Rain</button>
+                    <button type="button" class="btn btn-primary btn-sm  dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                      <span class="visually-hidden">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu overflow-scroll" style="max-width: 260px; max-height: 160px;">
+                      <li><a class="dropdown-item svgicon"  id="addRain">Add Rain</a></li>
+                      <li><a class="dropdown-item svgicon" id="addWind">Add Wind </a></li>
+                      <li><a class="dropdown-item svgicon" id="addDust">Add Dust </a></li>
+                      <li><a class="dropdown-item svgicon" id="addHail">Add Hail  </a></li>
+                      <li><a class="dropdown-item svgicon" id="addA">Add A </a></li>
+                      <li><a class="dropdown-item svgicon" id="addB">Add B </a></li>
+                      <li><a class="dropdown-item svgicon" id="addC">Add C </a></li>
+                      <li><a class="dropdown-item svgicon" id="addD">Add D </a></li>
+                      <li><a class="dropdown-item svgicon" id="addE">Add E </a></li>
+                      <li><a class="dropdown-item svgicon" id="addF">Add F </a></li>
+                      <li><a class="dropdown-item svgicon" id="addG">Add G </a></li>
+                      <li><a class="dropdown-item svgicon" id="addH">Add H </a></li>
+                      <li><a class="dropdown-item svgicon" id="addI">Add I </a></li>
+                    </ul> 
+                </div>
+                    <div class="col-6"> 
+                        <button type="button" class="btn btn-danger btn-sm text-white mx-2" id="inlandbutton2" >Delete Object</button>
+                    </div> 
+                  </div>
+                  <br> 
+                  <div class="row  my-2 ">
+<div class="col">
+     <button type="button" class="btn btn-sm btn-warning text-dark"  id="yellow-color"  data-bs-toggle="modal" data-bs-target="#exampleModal">Yellow</button>
+</div>
+<div class="col">
+    <button type="button" class="btn btn-sm btn-danger text-white" id="red-color"  data-bs-toggle="modal" data-bs-target="#exampleModal">Red</button>
+</div>
+<div class="col">
+    <button type="button" class="btn btn-sm  btn-success text-white" id="green-color"  data-bs-toggle="modal" data-bs-target="#exampleModal">Green</button>
+</div>
+<div class="col">
+    <button type="button" class="btn btn-sm  text-white" style="background-color: orange;" id="orange-color"  data-bs-toggle="modal" data-bs-target="#exampleModal">Orange</button>
+                
+</div>
+
+ 
+    </div>
+   </div>
+   </div>
+<div class="d-grid gap-2">
+  <button type="button" name="saveme" id="saveme" class="btn btn-primary">Save</button>
+</div>
+
+</div>
+   </div>
+            
+
+
+ 
+ 
+ 
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered ">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Weather Info</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="mb-3">
+                <label for="descrip" class="form-label">Description</label>
+                <textarea name="descrip" class="form-control" id="descrip" cols="30" rows="10"></textarea>
+                
+                <small id="helpId" class="form-text text-muted">Please enter your discription</small>
+              </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="closeinfo" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" id="saveinfo" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
 
@@ -45,33 +256,63 @@
 
 
 
+
+
+
+ 
 <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoidGhlbzYiLCJhIjoiY2xmazRpa2VzMDdiZDN0czR5Z2tiMGxheCJ9.GMZxHYFG0rGU8R6133k1kg';
-    var bineymap = new mapboxgl.Map({
-        container: 'bineymap',
-        style: 'mapbox://styles/mapbox/streets-v9', //hosted style id
-        zoom: 6.0,
-        center: [-1.3244, 3.6918],
-    });
+	
+// ===============MAP MARINE PAGE=========================
+function generateRandomId(length = 8) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+  
+    return result;
+  }
 
+  function savetoDatabase(masterContainer){
 
-
-
-    
-// Make a GET request to fetch the JSON file
-fetch('./index.json')
-  .then(response => response.json())
-  .then(data => {
-
-    
-    // Access the polygons array from the data
-    const polygons = data[0].polygons.polygons;
-    const markers = data[0].markers.markers;
+    if(masterContainer){
+    var pubBtn =  document.getElementById('saveme');
+    var finalData =  document.getElementById('finalData');
+    pubBtn.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>';
+  
    
+  
+  var jsonData = JSON.stringify(masterContainer);
+  finalData.value = jsonData;
 
- //console.log(polygons);
-//console.log(markers);
-bineymap.addSource('maine', {
+  pubBtn.innerHTML = '<span>Done</span>';
+  pubBtn.style.backgroundColor = 'Green';
+
+  }else{
+    alert("no data available")
+  }
+    
+  }
+
+
+
+
+mapboxgl.accessToken = 'pk.eyJ1IjoidGhlbzYiLCJhIjoiY2xmazRpa2VzMDdiZDN0czR5Z2tiMGxheCJ9.GMZxHYFG0rGU8R6133k1kg';
+var map = new mapboxgl.Map({
+  container: 'marineMapAdmin', // container id
+  style: 'mapbox://styles/mapbox/streets-v9', //hosted style id
+  zoom: 5,
+  center: [-1.6244,6.6918],
+});
+
+map.resize();
+map.on('render', function(){map.resize();});
+
+map.on('load', () => {
+    toggleSidebar('left');
+    // Add a data source containing GeoJSON data.
+    map.addSource('maine', {
     'type': 'geojson',
     'data': {
     'type': 'Feature',
@@ -79,10 +320,10 @@ bineymap.addSource('maine', {
    
 }
 });
-
+    
 //=====================eez====================
 
-bineymap.addSource('eezdemacation', {
+map.addSource('eezdemacation', {
     'type': 'geojson',
     'data': {
     'type': 'Feature',
@@ -96,9 +337,8 @@ bineymap.addSource('eezdemacation', {
 
 
 
-
     // Add a new layer to visualize the polygon.
-    bineymap.addLayer({
+    map.addLayer({
     'id': 'maine',
     'type': 'fill',
     'source': 'maine', // reference the data source
@@ -109,7 +349,7 @@ bineymap.addSource('eezdemacation', {
     }
     });
     // Add a black outline around the polygon.
-    bineymap.addLayer({
+    map.addLayer({
     'id': 'outline',
     'type': 'line',
     'source': 'maine',
@@ -119,9 +359,11 @@ bineymap.addSource('eezdemacation', {
     'line-width': 3
     }
     });
+
+
 //============================eez=============================
   // Add a new layer to visualize the polygon.
-    bineymap.addLayer({
+  map.addLayer({
     'id': 'eezdemacation',
     'type': 'line',
     'source': 'eezdemacation', // reference the data source
@@ -131,303 +373,863 @@ bineymap.addSource('eezdemacation', {
     'line-opacity': 1
     }
     });
+
+
+  });
+
+var drawFeatureID = '';
+var newDrawFeature = false;
+var polygons = [];
+// add draw
+var draw = new MapboxDraw({
+  displayControlsDefault: false,
+  // this is used to allow for custom properties for styling
+  // it appends the word "user_" to the property
+  userProperties: true,
+  controls: {
+      'combine_features': false,
+      'uncombine_features': false,
+      polygon: true,
+          trash: true
+  },
+  styles: [
+      {
+          'id': 'gl-draw-polygon-fill-inactive',
+          'type': 'fill',
+          'filter': ['all', ['==', 'active', 'false'],
+              ['==', '$type', 'Polygon'],
+              ['!=', 'mode', 'static']
+          ],
+          'paint': {
+              'fill-color': '#f5f7f7',
+              'fill-outline-color': '#f5f7f7',
+              'fill-opacity': 0.1
+          }
+      },
+      {
+          'id': 'gl-draw-polygon-fill-active',
+          'type': 'fill',
+          'filter': ['all', ['==', 'active', 'true'],
+              ['==', '$type', 'Polygon']
+          ],
+          'paint': {
+              'fill-color': '#fbb03b',
+              'fill-outline-color': '#fbb03b',
+              'fill-opacity': 0.1
+          }
+      },
+      {
+          'id': 'gl-draw-polygon-midpoint',
+          'type': 'circle',
+          'filter': ['all', ['==', '$type', 'Point'],
+              ['==', 'meta', 'midpoint']
+          ],
+          'paint': {
+              'circle-radius': 3,
+              'circle-color': '#fbb03b'
+          }
+      },
+      {
+          'id': 'gl-draw-polygon-stroke-inactive',
+          'type': 'line',
+          'filter': ['all', ['==', 'active', 'false'],
+              ['==', '$type', 'Polygon'],
+              ['!=', 'mode', 'static']
+          ],
+          'layout': {
+              'line-cap': 'round',
+              'line-join': 'round'
+          },
+          'paint': {
+              'line-color': '#f5f7f7',
+              'line-width': 2
+          }
+      },
+      {
+          'id': 'gl-draw-polygon-stroke-active',
+          'type': 'line',
+          'filter': ['all', ['==', 'active', 'true'],
+              ['==', '$type', 'Polygon']
+          ],
+          'layout': {
+              'line-cap': 'round',
+              'line-join': 'round'
+          },
+          'paint': {
+              'line-color': '#fbb03b',
+              'line-dasharray': [0.2, 2],
+              'line-width': 2
+          }
+      },
+      {
+          'id': 'gl-draw-line-inactive',
+          'type': 'line',
+          'filter': ['all', ['==', 'active', 'false'],
+              ['==', '$type', 'LineString'],
+              ['!=', 'mode', 'static']
+          ],
+          'layout': {
+              'line-cap': 'round',
+              'line-join': 'round'
+          },
+          'paint': {
+              'line-color': '#f5f7f7',
+              'line-width': 2
+          }
+      },
+      {
+          'id': 'gl-draw-line-active',
+          'type': 'line',
+          'filter': ['all', ['==', '$type', 'LineString'],
+              ['==', 'active', 'true']
+          ],
+          'layout': {
+              'line-cap': 'round',
+              'line-join': 'round'
+          },
+          'paint': {
+              'line-color': '#fbb03b',
+              'line-dasharray': [0.2, 2],
+              'line-width': 2
+          }
+      },
+      {
+          'id': 'gl-draw-polygon-and-line-vertex-stroke-inactive',
+          'type': 'circle',
+          'filter': ['all', ['==', 'meta', 'vertex'],
+              ['==', '$type', 'Point'],
+              ['!=', 'mode', 'static']
+          ],
+          'paint': {
+              'circle-radius': 5,
+              'circle-color': '#fff'
+          }
+      },
+      {
+          'id': 'gl-draw-polygon-and-line-vertex-inactive',
+          'type': 'circle',
+          'filter': ['all', ['==', 'meta', 'vertex'],
+              ['==', '$type', 'Point'],
+              ['!=', 'mode', 'static']
+          ],
+          'paint': {
+              'circle-radius': 3,
+              'circle-color': '#fbb03b'
+          }
+      },
+      {
+          'id': 'gl-draw-point-point-stroke-inactive',
+          'type': 'circle',
+          'filter': ['all', ['==', 'active', 'false'],
+              ['==', '$type', 'Point'],
+              ['==', 'meta', 'feature'],
+              ['!=', 'mode', 'static']
+          ],
+          'paint': {
+              'circle-radius': 5,
+              'circle-opacity': 1,
+              'circle-color': '#fff'
+          }
+      },
+      {
+          'id': 'gl-draw-point-inactive',
+          'type': 'circle',
+          'filter': ['all', ['==', 'active', 'false'],
+              ['==', '$type', 'Point'],
+              ['==', 'meta', 'feature'],
+              ['!=', 'mode', 'static']
+          ],
+          'paint': {
+              'circle-radius': 3,
+              'circle-color': '#f5f7f7'
+          }
+      },
+      {
+          'id': 'gl-draw-point-stroke-active',
+          'type': 'circle',
+          'filter': ['all', ['==', '$type', 'Point'],
+              ['==', 'active', 'true'],
+              ['!=', 'meta', 'midpoint']
+          ],
+          'paint': {
+              'circle-radius': 7,
+              'circle-color': '#fff'
+          }
+      },
+      {
+          'id': 'gl-draw-point-active',
+          'type': 'circle',
+          'filter': ['all', ['==', '$type', 'Point'],
+              ['!=', 'meta', 'midpoint'],
+              ['==', 'active', 'true']
+          ],
+          'paint': {
+              'circle-radius': 5,
+              'circle-color': '#fbb03b'
+          }
+      },
+      {
+          'id': 'gl-draw-polygon-fill-static',
+          'type': 'fill',
+          'filter': ['all', ['==', 'mode', 'static'],
+              ['==', '$type', 'Polygon']
+          ],
+          'paint': {
+              'fill-color': '#404040',
+              'fill-outline-color': '#404040',
+              'fill-opacity': 0.1
+          }
+      },
+      {
+          'id': 'gl-draw-polygon-stroke-static',
+          'type': 'line',
+          'filter': ['all', ['==', 'mode', 'static'],
+              ['==', '$type', 'Polygon']
+          ],
+          'layout': {
+              'line-cap': 'round',
+              'line-join': 'round'
+          },
+          'paint': {
+              'line-color': '#404040',
+              'line-width': 2
+          }
+      },
+      {
+          'id': 'gl-draw-line-static',
+          'type': 'line',
+          'filter': ['all', ['==', 'mode', 'static'],
+              ['==', '$type', 'LineString']
+          ],
+          'layout': {
+              'line-cap': 'round',
+              'line-join': 'round'
+          },
+          'paint': {
+              'line-color': '#404040',
+              'line-width': 2
+          }
+      },
+      {
+          'id': 'gl-draw-point-static',
+          'type': 'circle',
+          'filter': ['all', ['==', 'mode', 'static'],
+              ['==', '$type', 'Point']
+          ],
+          'paint': {
+              'circle-radius': 5,
+              'circle-color': '#404040'
+          }
+      },
+
+     
+
+      {
+          'id': 'gl-draw-polygon-color-picker',
+          'type': 'fill',
+          'filter': ['all', ['==', '$type', 'Polygon'],
+              ['has', 'user_portColor']
+          ],
+          'paint': {
+              'fill-color': ['get', 'user_portColor'],
+              'fill-outline-color': ['get', 'user_portColor'],
+              'fill-opacity': 0.5
+          }
+      },
+      {
+          'id': 'gl-draw-line-color-picker',
+          'type': 'line',
+          'filter': ['all', ['==', '$type', 'LineString'],
+              ['has', 'user_portColor']
+          ],
+          'paint': {
+              'line-color': ['get', 'user_portColor'],
+              'line-width': 2
+          }
+      },
+      {
+          'id': 'gl-draw-point-color-picker',
+          'type': 'circle',
+          'filter': ['all', ['==', '$type', 'Point'],
+              ['has', 'user_portColor']
+          ],
+          'paint': {
+              'circle-radius': 3,
+              'circle-color': ['get', 'user_portColor']
+          }
+      },
+
+  ]
+})
+
+map.addControl(draw, 'top-left');
+// Add the control to the map.
+map.addControl(
+new MapboxGeocoder({
+accessToken: mapboxgl.accessToken,
+mapboxgl: mapboxgl,
+country: 'GH'
+}),'top-left'
+);
+
+let yellowBtn = document.querySelector("#yellow-color");
+let orangeBtn = document.querySelector("#orange-color");
+
+let redBtn = document.querySelector("#red-color");
+let greenBtn = document.querySelector("#green-color");
+ var saveinfo = document.getElementById('saveinfo');
+const  savedes = document.querySelector("#savedes");
+var descrip = document.getElementById('descrip');
+
+yellowBtn.addEventListener("click", ()=>{
+    var myModal = document.getElementById('exampleModal');
+    var closeinfo = document.getElementById('closeinfo');
+    myModal.addEventListener('shown.bs.modal', function () {
+        saveinfo.addEventListener("click", ()=>{
+           var  detailsdescription =  descrip.value;
+           changeColor('yellow', detailsdescription);
+           closeinfo.click();
+ });
+    })
+
+});
+
+orangeBtn.addEventListener("click", ()=>{
+  var myModal = document.getElementById('exampleModal');
+  var closeinfo = document.getElementById('closeinfo');
+    myModal.addEventListener('shown.bs.modal', function () {
+        saveinfo.addEventListener("click", ()=>{
+           var  detailsdescription =  descrip.value;
+           changeColor('orange', detailsdescription);
+           closeinfo.click();
+ });
+    })
+
+});
+
+
+redBtn.addEventListener("click", ()=>{
+  var myModal = document.getElementById('exampleModal');
+  var closeinfo = document.getElementById('closeinfo');
+  myModal.addEventListener('shown.bs.modal', function () {
+      saveinfo.addEventListener("click", ()=>{
+         var  detailsdescription =  descrip.value;
+         changeColor('red', detailsdescription);
+         closeinfo.click();
+});
+  })
+});
+
+greenBtn.addEventListener("click", ()=>{
+  var myModal = document.getElementById('exampleModal');
+  var closeinfo = document.getElementById('closeinfo');
+  myModal.addEventListener('shown.bs.modal', function () {
+      saveinfo.addEventListener("click", ()=>{
+         var  detailsdescription =  descrip.value;
+         changeColor('green', detailsdescription);
+         closeinfo.click();
+});
+  })
+
+
+});
+
+
+
+
+
+//change colors
+function changeColor(color,detailsdescription) {
+    if (drawFeatureID !== '' && typeof draw === 'object') {
+  
+        // add whatever colors you want here...
+        if (color === 'yellow') {
+            draw.setFeatureProperty(drawFeatureID, 'portColor', '#e9f542');
+        }
+         else if (color === 'orange') {
+            draw.setFeatureProperty(drawFeatureID, 'portColor', '#eda411');
+        }
+         else if (color === 'red') {
+            draw.setFeatureProperty(drawFeatureID, 'portColor', '#ff0000');
+        } else if (color === 'green') {
+            draw.setFeatureProperty(drawFeatureID, 'portColor', '#008000');
+        }
    
+        var feat = draw.get(drawFeatureID);
+      //   console.log(feat);
+        draw.add(feat)
+  // on change of  color, update the polygons  array
+  var drawId = feat.id;
+  if (polygons.length === 0) {
+      polygons.push({
+          'id': drawId,
+          'cordinates': feat['geometry']['coordinates'],
+          'color' : feat.properties.portColor,
+          'descp' : detailsdescription
+      });
+    } else {
+      var index = polygons.findIndex(function(item) {
+              return item.id === drawId;
+          });
+          if (index !== -1) {
+                  polygons.splice(index, 1);
+                  polygons.push({
+                      'id': drawId,
+                      'cordinates': feat['geometry']['coordinates'],
+                      'color' : feat.properties.portColor,
+                      'descp' : detailsdescription
+                  });
+              }else{
+                  polygons.push({
+                      'id': drawId,
+                      'cordinates': feat['geometry']['coordinates'],
+                      'color' : feat.properties.portColor,
+                      'descp' : detailsdescription
+                  });
+                  console.log(`id doesn't exist: ${drawId}`)
+              } 
+          }
+    console.log(polygons);
+    }
+    console.log(polygons);
+  }
+
+  var  detailsdescription =  descrip.value;
+var setDrawFeature = function(e) {
+    if (e.features.length) {
+        var feat = e.features[0];
+        drawFeatureID = feat.id;
+        if (polygons.length === 0) {
+            polygons.push({
+                'id': drawFeatureID,
+                'cordinates': feat['geometry']['coordinates'],
+                'color' : feat.properties.portColor,
+                'descp' : detailsdescription
+            });
+          } else {
+            var index = polygons.findIndex(function(item) {
+                    return item.id === drawFeatureID;
+                });
+                if (index !== -1) {
+                        polygons.splice(index, 1);
+                        polygons.push({
+                            'id': drawFeatureID,
+                            'cordinates': feat['geometry']['coordinates'],
+                            'color' : feat.properties.portColor,
+                            'descp' : detailsdescription
+                        });
+                    }else{
+                        polygons.push({
+                            'id': drawFeatureID,
+                            'cordinates': feat['geometry']['coordinates'],
+                            'color' : feat.properties.portColor,
+                            'descp' : detailsdescription
+                        });
+                        console.log(`id doesn't exist: ${drawFeatureID}`)
+                    } 
+                }
+
+  console.log(polygons);
+    }
+  }
+/* Event Handlers for Draw Tools */
+
+
+map.on('draw.create', function() {
+  newDrawFeature = true;
+  setDrawFeature;
+});
+
+map.on('draw.update', setDrawFeature);
+
+map.on('draw.selectionchange', setDrawFeature);
+
+map.on('draw.delete', function(event) {
+    
+    // use the deletedPolygonId to do something
+    if (event.features.length) {
+        var deletedPolygonId = event.features[0].id;
+    //     var feat = event.features[0];
+    //  var   draID = feat.id;
+        if (polygons.length != 0) {
+            
+            var index = polygons.findIndex(function(item) {
+                    return item.id === deletedPolygonId;
+                });
+                if (index !== -1) {
+                        polygons.splice(index, 1);
+                        
+                         console.log(`id DELETED: ${deletedPolygonId}`)
+                    }else{
+                        
+                        console.log(`id doesn't exist: ${deletedPolygonId}`)
+                    } 
+                }
+
+  console.log(polygons);
+    }
+   
+  });
+
+
+
+
+map.on('click', function(e) {
+  if (!newDrawFeature) {
+      var drawFeatureAtPoint = draw.getFeatureIdsAt(e.point);
+      //if another drawFeature is not found - reset drawFeatureID
+      drawFeatureID = drawFeatureAtPoint.length ? drawFeatureAtPoint[0] : '';
+  }
+
+ newDrawFeature = false;
+
+});
+ 
+ // Define an array to store all markers
+var markers = [];
+var selectedMarker = null;
+//generate random id
+
+
+// Define a function to create a new draggable marker and add it to the map
+function addMarker(customValue) {
+    const iddf = generateRandomId();
+    if(customValue == "addRain"){
+          // Define the marker's icon using an SVG element
+var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+svgMarker.setAttribute('viewBox', '0 0 24 24');
+svgMarker.innerHTML = '<path d="M4.176 11.032a.5.5 0 0 1 .292.643l-1.5 4a.5.5 0 0 1-.936-.35l1.5-4a.5.5 0 0 1 .644-.293zm3 0a.5.5 0 0 1 .292.643l-1.5 4a.5.5 0 0 1-.936-.35l1.5-4a.5.5 0 0 1 .644-.293zm3 0a.5.5 0 0 1 .292.643l-1.5 4a.5.5 0 0 1-.936-.35l1.5-4a.5.5 0 0 1 .644-.293zm3 0a.5.5 0 0 1 .292.643l-1.5 4a.5.5 0 0 1-.936-.35l1.5-4a.5.5 0 0 1 .644-.293zm.229-7.005a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 10H13a3 3 0 0 0 .405-5.973z"/>';
+// Scale the SVG icon down
+var iconSize = 100;
+var scaleFactor = 0.5;
+svgMarker.setAttribute('width', iconSize * scaleFactor);
+svgMarker.setAttribute('height', iconSize * scaleFactor);
+// set the aria-label attribute
+svgMarker.setAttribute("aria-label", "Rain");
+svgMarker.setAttribute("id", iddf);
+    
+    }else if(customValue == "addWind"){
+ // Define the marker's icon using an SVG element
+ var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ svgMarker.setAttribute('viewBox', '0 0 24 24');
+ svgMarker.innerHTML = '<path d="M12.5 2A2.5 2.5 0 0 0 10 4.5a.5.5 0 0 1-1 0A3.5 3.5 0 1 1 12.5 8H.5a.5.5 0 0 1 0-1h12a2.5 2.5 0 0 0 0-5zm-7 1a1 1 0 0 0-1 1 .5.5 0 0 1-1 0 2 2 0 1 1 2 2h-5a.5.5 0 0 1 0-1h5a1 1 0 0 0 0-2zM0 9.5A.5.5 0 0 1 .5 9h10.042a3 3 0 1 1-3 3 .5.5 0 0 1 1 0 2 2 0 1 0 2-2H.5a.5.5 0 0 1-.5-.5z"/>';
+
+ // Scale the SVG icon down
+ var iconSize = 100;
+ var scaleFactor = 0.5;
+ svgMarker.setAttribute('width', iconSize * scaleFactor);
+ svgMarker.setAttribute('height', iconSize * scaleFactor);
+// set the aria-label attribute
+svgMarker.setAttribute("aria-label", "Wind");
+svgMarker.setAttribute("id", iddf);
+
+    }
+    else if(customValue == "addDust"){
+         // Define the marker's icon using an SVG element
+ var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ svgMarker.setAttribute('viewBox', '0 0 512 512');
+ svgMarker.innerHTML = '<path d="m264.2 21.3a39.9 39.9 0 0 1 68.8 27.7c0 22-18 40-40 40h-284m139.2 123.7a39.9 39.9 0 0 0 68.8-27.7c0-22-18-40-40-40h-168" fill="none" stroke="#000" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18"/><circle cx="96" cy="196" r="12"/><circle cx="180" cy="196" r="12"/><circle cx="264" cy="196" r="12"/><circle cx="222" cy="256" r="12"/><circle cx="306" cy="256" r="12"/><circle cx="390" cy="256" r="12"/><circle cx="172" cy="316" r="12"/><circle cx="256" cy="316" r="12"/><circle cx="340" cy="316" r="12"/><use height="234" transform="translate(86 139)" width="342" xlink:href="#a"/>';
+ 
+ // Scale the SVG icon down
+ var iconSize = 100;
+ var scaleFactor = 0.5;
+ svgMarker.setAttribute('width', iconSize * scaleFactor);
+ svgMarker.setAttribute('height', iconSize * scaleFactor);
+ // set the aria-label attribute
+svgMarker.setAttribute("aria-label", "Dust");
+svgMarker.setAttribute("id", iddf);
+    }
+    else if(customValue == "addHail"){ 
+         // Define the marker's icon using an SVG element
+ var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ svgMarker.setAttribute('viewBox', '0 0 24 24');
+ svgMarker.innerHTML = '<path d="M3.75 15.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm.408-3.724a.5.5 0 0 1 .316.632l-.5 1.5a.5.5 0 1 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.316zM7.75 15.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm.408-3.724a.5.5 0 0 1 .316.632l-.5 1.5a.5.5 0 1 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.316zm3.592 3.724a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm.408-3.724a.5.5 0 0 1 .316.632l-.5 1.5a.5.5 0 1 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.316zm1.247-6.999a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 10.5H13a3 3 0 0 0 .405-5.973z"/>';
+ 
+ // Scale the SVG icon down
+ var iconSize = 100;
+ var scaleFactor = 0.5;
+ svgMarker.setAttribute('width', iconSize * scaleFactor);
+ svgMarker.setAttribute('height', iconSize * scaleFactor);
+ // set the aria-label attribute
+svgMarker.setAttribute("aria-label", "Hail");
+svgMarker.setAttribute("id", iddf);
+}
+    else if(customValue == "addA"){
+  // Define the marker's icon using an SVG element
+ var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ svgMarker.setAttribute('viewBox', '0 0 384 512');
+ svgMarker.innerHTML = '<path d="M221.5 51.7C216.6 39.8 204.9 32 192 32s-24.6 7.8-29.5 19.7l-120 288-40 96c-6.8 16.3 .9 35 17.2 41.8s35-.9 41.8-17.2L93.3 384H290.7l31.8 76.3c6.8 16.3 25.5 24 41.8 17.2s24-25.5 17.2-41.8l-40-96-120-288zM264 320H120l72-172.8L264 320z"/>';
+ 
+ // Scale the SVG icon down
+ var iconSize = 50;
+ var scaleFactor = 0.5;
+ svgMarker.setAttribute('width', iconSize * scaleFactor);
+ svgMarker.setAttribute('height', iconSize * scaleFactor);
+ // set the aria-label attribute
+svgMarker.setAttribute("aria-label", "A");
+svgMarker.setAttribute("id", iddf);
+        
+    }
+    else if(customValue == "addB"){
+          // Define the marker's icon using an SVG element
+ var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ svgMarker.setAttribute('viewBox', '0 0 384 512');
+ svgMarker.innerHTML = '<path d="M64 32C28.7 32 0 60.7 0 96V256 416c0 35.3 28.7 64 64 64H192c70.7 0 128-57.3 128-128c0-46.5-24.8-87.3-62-109.7c18.7-22.3 30-51 30-82.3c0-70.7-57.3-128-128-128H64zm96 192H64V96h96c35.3 0 64 28.7 64 64s-28.7 64-64 64zM64 288h96 32c35.3 0 64 28.7 64 64s-28.7 64-64 64H64V288z"/>';
+ 
+ // Scale the SVG icon down
+ var iconSize = 50;
+ var scaleFactor = 0.5;
+ svgMarker.setAttribute('width', iconSize * scaleFactor);
+ svgMarker.setAttribute('height', iconSize * scaleFactor);
+ // set the aria-label attribute
+svgMarker.setAttribute("aria-label", "B");
+svgMarker.setAttribute("id", iddf);
+     
+    }
+    else if(customValue == "addC"){  
+                // Define the marker's icon using an SVG element
+ var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ svgMarker.setAttribute('viewBox', '0 0 384 512');
+ svgMarker.innerHTML = '<path d="M329.1 142.9c-62.5-62.5-155.8-62.5-218.3 0s-62.5 163.8 0 226.3s155.8 62.5 218.3 0c12.5-12.5 32.8-12.5 45.3 0s12.5 32.8 0 45.3c-87.5 87.5-221.3 87.5-308.8 0s-87.5-229.3 0-316.8s221.3-87.5 308.8 0c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0z"/>';
+ 
+ // Scale the SVG icon down
+ var iconSize = 50;
+ var scaleFactor = 0.5;
+ svgMarker.setAttribute('width', iconSize * scaleFactor);
+ svgMarker.setAttribute('height', iconSize * scaleFactor);
+ // set the aria-label attribute
+svgMarker.setAttribute("aria-label", "C");
+svgMarker.setAttribute("id", iddf);
+    }
+    else if(customValue == "addD"){  
+    // Define the marker's icon using an SVG element
+ var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ svgMarker.setAttribute('viewBox', '0 0 384 512');
+ svgMarker.innerHTML = '<path d="M0 96C0 60.7 28.7 32 64 32h96c123.7 0 224 100.3 224 224s-100.3 224-224 224H64c-35.3 0-64-28.7-64-64V96zm160 0H64V416h96c88.4 0 160-71.6 160-160s-71.6-160-160-160z"/>';
+ 
+ // Scale the SVG icon down
+ var iconSize = 50;
+ var scaleFactor = 0.5;
+ svgMarker.setAttribute('width', iconSize * scaleFactor);
+ svgMarker.setAttribute('height', iconSize * scaleFactor);
+ // set the aria-label attribute
+svgMarker.setAttribute("aria-label", "D");
+svgMarker.setAttribute("id", iddf);
+}
+    else if(customValue == "addE"){  
+            // Define the marker's icon using an SVG element
+ var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ svgMarker.setAttribute('viewBox', '0 0 384 512');
+ svgMarker.innerHTML = '<path d="M64 32C28.7 32 0 60.7 0 96V256 416c0 35.3 28.7 64 64 64H288c17.7 0 32-14.3 32-32s-14.3-32-32-32H64V288H224c17.7 0 32-14.3 32-32s-14.3-32-32-32H64V96H288c17.7 0 32-14.3 32-32s-14.3-32-32-32H64z"/>';
+ 
+ // Scale the SVG icon down
+ var iconSize = 50;
+ var scaleFactor = 0.5;
+ svgMarker.setAttribute('width', iconSize * scaleFactor);
+ svgMarker.setAttribute('height', iconSize * scaleFactor);
+ // set the aria-label attribute
+svgMarker.setAttribute("aria-label", "E");
+svgMarker.setAttribute("id", iddf);
+}
+    else if(customValue == "addF"){
+        // Define the marker's icon using an SVG element
+ var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ svgMarker.setAttribute('viewBox', '0 0 384 512');
+ svgMarker.innerHTML = '<path d="M64 32C28.7 32 0 60.7 0 96V256 448c0 17.7 14.3 32 32 32s32-14.3 32-32V288H224c17.7 0 32-14.3 32-32s-14.3-32-32-32H64V96H288c17.7 0 32-14.3 32-32s-14.3-32-32-32H64z"/>';
+ 
+ // Scale the SVG icon down
+ var iconSize = 50;
+ var scaleFactor = 0.5;
+ svgMarker.setAttribute('width', iconSize * scaleFactor);
+ svgMarker.setAttribute('height', iconSize * scaleFactor); 
+ // set the aria-label attribute
+svgMarker.setAttribute("aria-label", "F");
+svgMarker.setAttribute("id", iddf);
+    }
+    else if(customValue == "addG"){
+         // Define the marker's icon using an SVG element
+ var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ svgMarker.setAttribute('viewBox', '0 0 384 512');
+ svgMarker.innerHTML = '<path d="M224 96C135.6 96 64 167.6 64 256s71.6 160 160 160c77.4 0 142-55 156.8-128H256c-17.7 0-32-14.3-32-32s14.3-32 32-32H400c25.8 0 49.6 21.4 47.2 50.6C437.8 389.6 341.4 480 224 480C100.3 480 0 379.7 0 256S100.3 32 224 32c57.4 0 109.7 21.6 149.3 57c13.2 11.8 14.3 32 2.5 45.2s-32 14.3-45.2 2.5C302.3 111.4 265 96 224 96z"/>';
+ 
+ // Scale the SVG icon down
+ var iconSize = 50;
+ var scaleFactor = 0.5;
+ svgMarker.setAttribute('width', iconSize * scaleFactor);
+ svgMarker.setAttribute('height', iconSize * scaleFactor); 
+ // set the aria-label attribute
+svgMarker.setAttribute("aria-label", "G");
+svgMarker.setAttribute("id", iddf);
+}
+    else if(customValue == "addH"){
+         // Define the marker's icon using an SVG element
+ var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ svgMarker.setAttribute('viewBox', '0 0 384 512');
+ svgMarker.innerHTML = '<path d="M320 256l0 192c0 17.7 14.3 32 32 32s32-14.3 32-32l0-224V64c0-17.7-14.3-32-32-32s-32 14.3-32 32V192L64 192 64 64c0-17.7-14.3-32-32-32S0 46.3 0 64V448c0 17.7 14.3 32 32 32s32-14.3 32-32l0-192 256 0z"/>';
+ 
+ // Scale the SVG icon down
+ var iconSize = 50;
+ var scaleFactor = 0.5;
+ svgMarker.setAttribute('width', iconSize * scaleFactor);
+ svgMarker.setAttribute('height', iconSize * scaleFactor);
+ // set the aria-label attribute
+svgMarker.setAttribute("aria-label", "H");
+svgMarker.setAttribute("id", iddf);
+ }
+    else if(customValue == "addI"){
+  // Define the marker's icon using an SVG element
+ var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+ svgMarker.setAttribute('viewBox', '0 0 384 512');
+ svgMarker.innerHTML = '<path d="M32 32C14.3 32 0 46.3 0 64S14.3 96 32 96h96V416H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H288c17.7 0 32-14.3 32-32s-14.3-32-32-32H192V96h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H160 32z"/>';
+ 
+ // Scale the SVG icon down
+ var iconSize = 50;
+ var scaleFactor = 0.5;
+ svgMarker.setAttribute('width', iconSize * scaleFactor);
+ svgMarker.setAttribute('height', iconSize * scaleFactor);
+ // set the aria-label attribute
+svgMarker.setAttribute("aria-label", "I");
+svgMarker.setAttribute("id", iddf);
+        
+    }
     
 
-
-    var bineypolygondata = polygons;
-    var bineymarkerdata = markers;
-    // Loop through the array and retrieve the 'polygon' key for each object
-    const bineypolygonns = [];
-    if (bineypolygondata != 'null' && bineypolygondata) {
-        bineypolygondata.forEach(obj => {
-         //  console.log(obj.descp)
-            bineypolygonns.push({
-                'type': 'Feature',
-                'geometry': {
-                    'type': 'Polygon',
-                    'coordinates': [obj.cordinates[0]],
-                },
-                'properties': {
-                    'fill-color': obj.color,
-                    'name': obj.descp
-                }
-            });
-        });
+  // Create a new marker with the customized icon
+  var marker = new mapboxgl.Marker({
+    element: svgMarker,
+    draggable: true 
+  });
+ 
+ // Set the marker's initial position and add it to the map
+  marker.setLngLat([-1.6244,6.6918]).addTo(map);
+  // Add a dragend event listener to the marker
+  marker.on('dragend', function() {
+// on drag remove the maker and insert the new marker
+    var index = markers.findIndex(function(item) {
+        return item.id === marker.getElement().id;
+    });
+  if (index !== -1) {
+    markers.splice(index, 1);
+ // Add the new marker to the markers array
+ markers.push({'id': marker.getElement().id, 'icontype': marker.getElement().getAttribute("aria-label"), 'lnglat' : marker.getLngLat()});
     }
-    // console.log(bineypolygonns);
-    // Now you can access the data variable in your JavaScript code
-    //console.log(bineymarkerdata);
 
-    //bineymap.resize();
-   // bineymap.on('render', function(){bineymap.resize();});
-   function openPopup(features, coordinates) {
-    // Create a popup
-    var popup = new mapboxgl.Popup({ closeButton: true })
-      .setLngLat(coordinates)
-      .setHTML('<h3>' + features.properties.name +'</h3>')
-      .addTo(bineymap);
+  console.log(markers);
+  });
+
+ 
+
+  // Add a click event listener to each marker
+  marker.getElement().addEventListener('click', function () {
+    // Set the selectedMarker variable to the clicked marker
+    selectedMarker = marker;
+  });
+
+  // Add the new marker to the markers array
+  markers.push({'id':marker.getElement().id, 'icontype': marker.getElement().getAttribute("aria-label"), 'lnglat' : marker.getLngLat()});
+}
+
+  
+ 
+// Define a function to remove a marker on click
+function removeMarker(selectmarker) {
+    var index = markers.findIndex(function(item) {
+        return item.id === selectmarker.getElement().id;
+    });
+    
+selectmarker.remove();
+  if (index !== -1) {
+    markers.splice(index, 1);
+    }
+    console.log(index);
+    console.log(markers);
+
+ }
+  
+ 
+// Define a function to update the position of a marker
+function updateMarkerPosition(marker, lngLat) {
+    marker.setLngLat(lngLat);
   }
   
+  // Define a function to customize the appearance of a marker
+  function customizeMarker(marker, iconUrl) {
+    var el = document.createElement('div');
+    el.className = 'marker';
+    el.style.backgroundImage = 'url(' + iconUrl + ')';
+    el.style.width = '32px';
+    el.style.height = '32px';
+    marker.setElement(el);
+  }
 
+  // Add an event listener to the button to create a new marker
+document.getElementById('inlandbutton1').addEventListener('click', function() {
+// Retrieve the value of the custom attribute
+const customValue = this.getAttribute('typeofIcon');
 
-    bineymap.on('load', function () {
-       // bineymap.resize();
-     //  console.log(bineypolygonns);
-        bineymap.addSource('polygons', {
-            'type': 'geojson',
-            'data': {
-                'type': 'FeatureCollection',
-                'features': bineypolygonns
+    addMarker(customValue);
 
-            }
-        });
-        if (bineypolygondata != 'null' && bineypolygondata) {
-            bineypolygondata.forEach(obj => {
-                bineymap.addLayer({
-                    'id': obj.id,
-                    'type': 'fill',
-                    'source': 'polygons',
-                    'paint': {
-                        'fill-color': ['get', 'fill-color'],
-                        'fill-opacity': 0.3
-                    },
-                    'filter': ['==', '$type', 'Polygon']
-                });
-               // openPopup('name testing......', [obj.lnglat.lng, obj.lnglat.lat])
- // Attach a click event listener to each polygon layer
-
- bineymap.on('click', obj.id, function (e,) {
-    openPopup(e.features[0], e.lngLat);
   });
-              //  bineymap.on('click', 'polygons', (e) => {
-                   // new mapboxgl.Popup()
-                   // .setLngLat([obj.lnglat.lng, obj.lnglat.lat])
-                   // .setText("hh")
-                   // .addTo(bineymap);
-                   // });
-
-                //var e = obj;
-              //  bineymap.on('click', 'polygons', (e) => {
-                 //   console.log("hhhhiiii")
-                 //   new mapboxgl.Popup()
-                  //  .setLngLat(e.lngLat)
-                 //   .setText("hh")
-                 //   .addTo(bineymap);
-                  //  });
-                   bineymap.on('mouseenter', 'polygons', () => {
-                      bineymap.getCanvas().style.cursor = 'pointer';
-                        });
-                         
-                        // Change the cursor back to a pointer
-                        // when it leaves the states layer.
-                       bineymap.on('mouseleave', 'polygons', () => {
-                           bineymap.getCanvas().style.cursor = '';
-                        });
-
-
-
-            });
-            
-          
-
-
-        };
-        //add pop up
-    
-        if (bineymarkerdata != 'null' && bineymarkerdata) {
-            bineymarkerdata.forEach(obj => {
-                var svgMarker;
-
-                var customValue = obj.icontype;
-                if (customValue == "Rain") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 24 24');
-                    svgMarker.innerHTML = '<path d="M4.176 11.032a.5.5 0 0 1 .292.643l-1.5 4a.5.5 0 0 1-.936-.35l1.5-4a.5.5 0 0 1 .644-.293zm3 0a.5.5 0 0 1 .292.643l-1.5 4a.5.5 0 0 1-.936-.35l1.5-4a.5.5 0 0 1 .644-.293zm3 0a.5.5 0 0 1 .292.643l-1.5 4a.5.5 0 0 1-.936-.35l1.5-4a.5.5 0 0 1 .644-.293zm3 0a.5.5 0 0 1 .292.643l-1.5 4a.5.5 0 0 1-.936-.35l1.5-4a.5.5 0 0 1 .644-.293zm.229-7.005a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 10H13a3 3 0 0 0 .405-5.973z"/>';
-                    // Scale the SVG icon down
-                    var iconSize = 50;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-
-                } else if (customValue == "Wind") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 24 24');
-                    svgMarker.innerHTML = '<path d="M12.5 2A2.5 2.5 0 0 0 10 4.5a.5.5 0 0 1-1 0A3.5 3.5 0 1 1 12.5 8H.5a.5.5 0 0 1 0-1h12a2.5 2.5 0 0 0 0-5zm-7 1a1 1 0 0 0-1 1 .5.5 0 0 1-1 0 2 2 0 1 1 2 2h-5a.5.5 0 0 1 0-1h5a1 1 0 0 0 0-2zM0 9.5A.5.5 0 0 1 .5 9h10.042a3 3 0 1 1-3 3 .5.5 0 0 1 1 0 2 2 0 1 0 2-2H.5a.5.5 0 0 1-.5-.5z"/>';
-
-                    // Scale the SVG icon down
-                    var iconSize = 50;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-
-                } else if (customValue == "Dust") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 512 512');
-                    svgMarker.innerHTML = '<path d="m264.2 21.3a39.9 39.9 0 0 1 68.8 27.7c0 22-18 40-40 40h-284m139.2 123.7a39.9 39.9 0 0 0 68.8-27.7c0-22-18-40-40-40h-168" fill="none" stroke="#000" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18"/><circle cx="96" cy="196" r="12"/><circle cx="180" cy="196" r="12"/><circle cx="264" cy="196" r="12"/><circle cx="222" cy="256" r="12"/><circle cx="306" cy="256" r="12"/><circle cx="390" cy="256" r="12"/><circle cx="172" cy="316" r="12"/><circle cx="256" cy="316" r="12"/><circle cx="340" cy="316" r="12"/><use height="234" transform="translate(86 139)" width="342" xlink:href="#a"/>';
-
-                    // Scale the SVG icon down
-                    var iconSize = 50;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-                } else if (customValue == "Hail") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 24 24');
-                    svgMarker.innerHTML = '<path d="M3.75 15.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm.408-3.724a.5.5 0 0 1 .316.632l-.5 1.5a.5.5 0 1 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.316zM7.75 15.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm.408-3.724a.5.5 0 0 1 .316.632l-.5 1.5a.5.5 0 1 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.316zm3.592 3.724a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm.408-3.724a.5.5 0 0 1 .316.632l-.5 1.5a.5.5 0 1 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.316zm1.247-6.999a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 10.5H13a3 3 0 0 0 .405-5.973z"/>';
-
-                    // Scale the SVG icon down
-                    var iconSize = 50;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-                } else if (customValue == "A") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 384 512');
-                    svgMarker.innerHTML = '<path d="M221.5 51.7C216.6 39.8 204.9 32 192 32s-24.6 7.8-29.5 19.7l-120 288-40 96c-6.8 16.3 .9 35 17.2 41.8s35-.9 41.8-17.2L93.3 384H290.7l31.8 76.3c6.8 16.3 25.5 24 41.8 17.2s24-25.5 17.2-41.8l-40-96-120-288zM264 320H120l72-172.8L264 320z"/>';
-
-                    // Scale the SVG icon down
-                    var iconSize = 40;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-
-                } else if (customValue == "B") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 384 512');
-                    svgMarker.innerHTML = '<path d="M64 32C28.7 32 0 60.7 0 96V256 416c0 35.3 28.7 64 64 64H192c70.7 0 128-57.3 128-128c0-46.5-24.8-87.3-62-109.7c18.7-22.3 30-51 30-82.3c0-70.7-57.3-128-128-128H64zm96 192H64V96h96c35.3 0 64 28.7 64 64s-28.7 64-64 64zM64 288h96 32c35.3 0 64 28.7 64 64s-28.7 64-64 64H64V288z"/>';
-
-                    // Scale the SVG icon down
-                    var iconSize = 40;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-
-                } else if (customValue == "C") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 384 512');
-                    svgMarker.innerHTML = '<path d="M329.1 142.9c-62.5-62.5-155.8-62.5-218.3 0s-62.5 163.8 0 226.3s155.8 62.5 218.3 0c12.5-12.5 32.8-12.5 45.3 0s12.5 32.8 0 45.3c-87.5 87.5-221.3 87.5-308.8 0s-87.5-229.3 0-316.8s221.3-87.5 308.8 0c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0z"/>';
-
-                    // Scale the SVG icon down
-                    var iconSize = 40;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-                } else if (customValue == "D") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 384 512');
-                    svgMarker.innerHTML = '<path d="M0 96C0 60.7 28.7 32 64 32h96c123.7 0 224 100.3 224 224s-100.3 224-224 224H64c-35.3 0-64-28.7-64-64V96zm160 0H64V416h96c88.4 0 160-71.6 160-160s-71.6-160-160-160z"/>';
-
-                    // Scale the SVG icon down
-                    var iconSize = 40;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-                } else if (customValue == "E") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 384 512');
-                    svgMarker.innerHTML = '<path d="M64 32C28.7 32 0 60.7 0 96V256 416c0 35.3 28.7 64 64 64H288c17.7 0 32-14.3 32-32s-14.3-32-32-32H64V288H224c17.7 0 32-14.3 32-32s-14.3-32-32-32H64V96H288c17.7 0 32-14.3 32-32s-14.3-32-32-32H64z"/>';
-
-                    // Scale the SVG icon down
-                    var iconSize = 40;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-                } else if (customValue == "F") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 384 512');
-                    svgMarker.innerHTML = '<path d="M64 32C28.7 32 0 60.7 0 96V256 448c0 17.7 14.3 32 32 32s32-14.3 32-32V288H224c17.7 0 32-14.3 32-32s-14.3-32-32-32H64V96H288c17.7 0 32-14.3 32-32s-14.3-32-32-32H64z"/>';
-
-                    // Scale the SVG icon down
-                    var iconSize = 40;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-                } else if (customValue == "G") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 384 512');
-                    svgMarker.innerHTML = '<path d="M224 96C135.6 96 64 167.6 64 256s71.6 160 160 160c77.4 0 142-55 156.8-128H256c-17.7 0-32-14.3-32-32s14.3-32 32-32H400c25.8 0 49.6 21.4 47.2 50.6C437.8 389.6 341.4 480 224 480C100.3 480 0 379.7 0 256S100.3 32 224 32c57.4 0 109.7 21.6 149.3 57c13.2 11.8 14.3 32 2.5 45.2s-32 14.3-45.2 2.5C302.3 111.4 265 96 224 96z"/>';
-
-                    // Scale the SVG icon down
-                    var iconSize = 40;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-                } else if (customValue == "H") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 384 512');
-                    svgMarker.innerHTML = '<path d="M320 256l0 192c0 17.7 14.3 32 32 32s32-14.3 32-32l0-224V64c0-17.7-14.3-32-32-32s-32 14.3-32 32V192L64 192 64 64c0-17.7-14.3-32-32-32S0 46.3 0 64V448c0 17.7 14.3 32 32 32s32-14.3 32-32l0-192 256 0z"/>';
-
-                    // Scale the SVG icon down
-                    var iconSize = 40;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-                } else if (customValue == "I") {
-                    // Define the marker's icon using an SVG bineyElement
-                    var svgMarker = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    svgMarker.setAttribute('viewBox', '0 0 384 512');
-                    svgMarker.innerHTML = '<path d="M32 32C14.3 32 0 46.3 0 64S14.3 96 32 96h96V416H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H288c17.7 0 32-14.3 32-32s-14.3-32-32-32H192V96h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H160 32z"/>';
-
-                    // Scale the SVG icon down
-                    var iconSize = 40;
-                    var scaleFactor = 0.5;
-                    svgMarker.setAttribute('width', iconSize * scaleFactor);
-                    svgMarker.setAttribute('height', iconSize * scaleFactor);
-                } else {
-                    alert(customValue);
-                }
-
-
-
-
-                new mapboxgl.Marker({
-                        'element': svgMarker,
-                        'anchor': 'bottom'
-                    })
-                    .setLngLat([obj.lnglat.lng, obj.lnglat.lat])
-                    .addTo(bineymap);
-                // marker.getElement().style.backgroundImage = 'url(https://img.favpng.com/24/21/9/food-icon-thanksgiving-fill-icon-food-icon-png-favpng-3mbb5g1Ubhi7EHPpjELypuBpn.jpg)';
-                // marker.getElement().style.backgroundSize = '100%';
-                // marker.getElement().style.width = '50px';
-                // marker.getElement().style.height = '50px';
-
-
-            });
-
-        }
-
-        
-       
-        
-        
-        
-        
-
-
-
-
-
-
-
-
-    });
-})
-.catch(error => {
-  console.error('Error fetching JSON:', error);
+  
+//  change  type of marker type:
+var svgIcons = document.querySelectorAll('.svgicon');
+var addicon = document.querySelector("#inlandbutton1");
+svgIcons.forEach(function(svgIcon) {
+  svgIcon.addEventListener('click', function() {
+    var id = this.id;
+    var content = this.textContent.trim();
+    addicon.setAttribute('typeofIcon', id);
+       addicon.textContent = content;
+    console.log('ID:', id);
+    console.log('Content:', content);
+  });
 });
+
+
+ 
+ 
+ // Add an event listener to the button to remove the selected marker
+ document.getElementById('inlandbutton2').addEventListener('click', function() {
+    
+    if (selectedMarker) {
+      removeMarker(selectedMarker);
+      selectedMarker = null;
+    }
+    console.log(markers);
+  });
+
+
+
+
+
+  document.getElementById('saveme').addEventListener('click', function() {
+    const masterContainer = [];
+    masterContainer.push({
+        'markers':  {'markers': markers},
+        'polygons': {'polygons': polygons },
+    });
+
+    savetoDatabase(masterContainer)
+  });
+
+// ===============END OF MARINE  MAP  PAGE=========================
+ 
+function toggleSidebar(id) {
+    const elem = document.getElementById(id);
+    // Add or remove the 'collapsed' CSS class from the sidebar element.
+    // Returns boolean "true" or "false" whether 'collapsed' is in the class list.
+    const collapsed = elem.classList.toggle('collapsed');
+    const padding = {};
+    // 'id' is 'right' or 'left'. When run at start, this object looks like: '{left: 300}';
+    padding[id] = collapsed ? 0 : 300; // 0 if collapsed, 300 px if not. This matches the width of the sidebars in the .sidebar CSS class.
+    // Use `map.easeTo()` with a padding option to adjust the map's center accounting for the position of sidebars.
+    map.easeTo({
+    padding: padding,
+    duration: 1000 // In ms. This matches the CSS transition duration property.
+    });
+    }
+
+
 </script>
 
 </body>
